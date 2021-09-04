@@ -1,4 +1,10 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
+
+const url = process.env.LOCAL_URL;
+mongoose.connect(url, (err) => {
+    if (err) console.error("couldn't build DB connection");
+    else console.info("DB connected successfully")
+});
 
 const userSchema = new mongoose.Schema({
     userId: String,

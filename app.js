@@ -5,13 +5,15 @@ const app = express();
 const bodyParser = require('body-parser');
 const jwt = require("jsonwebtoken")
 const { v4: uuid } = require('uuid');
+
+
+// Local requires
+const { success, error } = require("./utils/response")
 const {
     User,
     Activity
 } = require('./DB/schema');
-
-// Local requires
-
+const { verification } = require("./utils/verification");
 const userRoute = require('./routes/userRoutes')
 
 
@@ -20,20 +22,27 @@ app.use(bodyParser.json());
 // User route
 app.use('/api/user', verifyUser, userRoute)
 
-app.post("/api/login", (req, res) => {
-    const { body: userObject } = req;
-    jwt.sign(userObject, process.env.JWT_SECRET, (err, token) => {
-        if (err) return res.status(501).send("VERIFICATION_FAILED")
-        res.send({
-            status: "success",
-            token
-        })
+app.post("/api/login", async (req, res) => {
+    const { userName, password } = req.body;
+    const existUser = await User.findOne({ userName, password });
+    if (!existUser) return error("NO_USER_FOUND", res);
+    jwt.sign(existUser, process.env.JWT_SECRET, (err, token) => {
+        if (err) return error("VERIFICATION_FAILED", res);
+        return success("Logged in successfully", res, { token })
     })
 })
 
+
 app.post("/api/register", async (req, res) => {
     const { body: userObject } = req;
+    if (!userObject) return error("NO_DATA_FOUND", res);
+    if (!verification(userObject)) return error("WRONG_FILED_ERROR", res);
+
+    userObject.userId = uuid();
     const newUserObject = new User(userObject);
+    newUserObject.save((err) => {
+        if (err) return res.status(500).send("ERROR WHILE INSERTING")
+    });
     res.send(newUserObject)
 });
 
