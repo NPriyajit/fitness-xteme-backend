@@ -3,8 +3,13 @@ require('dotenv').config()
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
 const jwt = require("jsonwebtoken")
+const { v4: uuid } = require('uuid');
+const {
+    User,
+    Activity
+} = require('./DB/schema');
+
 // Local requires
 
 const userRoute = require('./routes/userRoutes')
@@ -28,7 +33,8 @@ app.post("/api/login", (req, res) => {
 
 app.post("/api/register", async (req, res) => {
     const { body: userObject } = req;
-    res.send(userObject)
+    const newUserObject = new User(userObject);
+    res.send(newUserObject)
 });
 
 
