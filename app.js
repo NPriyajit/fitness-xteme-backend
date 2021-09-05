@@ -4,6 +4,7 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const jwt = require("jsonwebtoken")
+const cors = require('cors')
 const { v4: uuid } = require('uuid');
 
 
@@ -16,7 +17,7 @@ const {
 const { verification } = require("./utils/util");
 const userRoute = require('./routes/userRoutes')
 
-
+app.use(cors())
 app.use(bodyParser.json());
 
 // User route
