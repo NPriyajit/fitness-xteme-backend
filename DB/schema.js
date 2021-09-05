@@ -28,16 +28,22 @@ const activitySchema = new mongoose.Schema({
     userId: String,
     workout: {
         time: Number,
+        unit: String,
     },
     diet: {
         foodList: [],
     },
     water: {
         glasses: Number,
+        unit: String,
     },
     sleep: {
-        time: Number
+        time: Number,
+        unit: String,
     },
+    day: Number,
+    month: Number,
+    year: Number,
     date: String
 });
 

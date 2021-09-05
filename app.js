@@ -10,10 +10,10 @@ const { v4: uuid } = require('uuid');
 // Local requires
 const { success, error } = require("./utils/response")
 const {
-    User,
-    Activity
+    User
 } = require('./DB/schema');
-const { verification } = require("./utils/verification");
+
+const { verification } = require("./utils/util");
 const userRoute = require('./routes/userRoutes')
 
 
@@ -26,7 +26,7 @@ app.post("/api/login", async (req, res) => {
     const { userName, password } = req.body;
     const existUser = await User.findOne({ userName, password });
     if (!existUser) return error("NO_USER_FOUND", res);
-    jwt.sign(existUser, process.env.JWT_SECRET, (err, token) => {
+    jwt.sign({ userId: existUser.userId }, process.env.JWT_SECRET, (err, token) => {
         if (err) return error("VERIFICATION_FAILED", res);
         return success("Logged in successfully", res, { token })
     })
@@ -50,9 +50,12 @@ app.post("/api/register", async (req, res) => {
 function verifyUser(req, res, next) {
     const bearerToken = req.headers["authorization"]
     jwt.verify(bearerToken, process.env.JWT_SECRET, (err, decode) => {
-        if (!err || decode) next();
+        if (!err || decode) {
+            req.token = bearerToken;
+            next();
+        }
         else {
-            res.status(403).send("AUTH_ERROR")
+            res.status(403).send("AUTH_TOKEN_ERROR")
         }
     });
 }

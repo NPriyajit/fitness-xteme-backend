@@ -1,6 +1,7 @@
 module.exports = {
 
     error(msg, res) {
+        console.error(msg);
         return res.status(500).send({
             status: "ERROR",
             msg
