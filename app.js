@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const jwt = require("jsonwebtoken")
 const cors = require('cors')
 const { v4: uuid } = require('uuid');
-
+const bcrypt = require('bcrypt')
 
 // Local requires
 const { success, error } = require("./utils/response")
@@ -27,12 +27,27 @@ app.use('/api/user', verifyUser, userRoute)
 
 app.post("/api/login", async (req, res) => {
     const { userName, password } = req.body;
-    const existUser = await User.findOne({ userName, password });
-    if (!existUser) return error("NO_USER_FOUND", res);
+    const existUser = await User.find({ userName });
+    let flag = false;
+    for (let user of existUser) {
+        const match = bcrypt.compareSync(password, user.password);
+        if (match) {
+            flag = true;
+            break;
+        }
+    }
+    if (!flag) return error("NO_USER_FOUND", res);
     jwt.sign({ userId: existUser.userId }, process.env.JWT_SECRET, (err, token) => {
         if (err) return error("VERIFICATION_FAILED", res);
         return success("Logged in successfully", res, { token })
     })
+})
+
+app.get("/api/check/user/:userName", async (req, res) => {
+    const { userName } = req.params;
+    const existUser = await User.findOne({ userName })
+    if (existUser) return error("USER_ALREADY_EXISTS", res);
+    return success("NO_USER_FOUND_PLEASE_PROCEED", res, { userName });
 })
 
 
@@ -40,13 +55,17 @@ app.post("/api/register", async (req, res) => {
     const { body: userObject } = req;
     if (!userObject) return error("NO_DATA_FOUND", res);
     if (!verification(userObject)) return error("WRONG_FILED_ERROR", res);
+    const userId = uuid();
+    userObject.userId = userId;
+    const salt = bcrypt.genSaltSync(parseInt(process.env.SALT_ROUNDS));
+    const password = bcrypt.hashSync(userObject.password, salt);
 
-    userObject.userId = uuid();
+    userObject.password = password;
     const newUserObject = new User(userObject);
     newUserObject.save((err) => {
-        if (err) return res.status(500).send("ERROR WHILE INSERTING")
+        if (err) return res.status(500).send("ERROR_WHILE_INSERTING")
     });
-    res.send(newUserObject)
+    return success("User Added Successfully!", res, { userId, userName: newUserObject.userName })
 });
 
 app.post("/feedback", (req, res) => {
@@ -62,24 +81,47 @@ app.post("/feedback", (req, res) => {
     })
 });
 
-app.post("/admin/login", async (req, res) => {
+app.post("/api/admin/login", async (req, res) => {
     const { userName, password } = req.body;
     const existUser = await Admin.find({});
-    if (!existUser) {
+
+    if (existUser.length === 0) {
+        const salt = bcrypt.genSaltSync(parseInt(process.env.SALT_ROUNDS));
+        const saltPassword = bcrypt.hashSync(process.env.PASSWORD, salt);
         const newUser = new Admin({
-            userName: process.env.USERNAME,
-            password: process.env.PASSWORD,
+            userName: process.env.ADMIN_NAME,
+            password: saltPassword
         });
         newUser.save((err) => {
             if (err) return error("ERROR_WHILE_ADDING", res);
         });
-    } else {
-        const existAdmin = await Admin.findOne({ userName, password });
-        if (!existAdmin) return error("ERROR_WHILE_FETCHING", res);
-        res.json(existAdmin);
     }
+    const existAdmins = await Admin.find({ userName });
+    let flag = false;
+    for (let admin of existAdmins) {
+        const match = bcrypt.compareSync(password, admin.password);
+        if (match) {
+            flag = true;
+            break;
+        }
+    }
+    if (!flag) return error("NO_ADMIN_FOUND", res);
+    return success("Admin found", res)
+
 })
 
+app.get('/api/all/users', async (req, res) => {
+    res.json(await User.find({}));
+})
+
+
+app.delete('/api/remove/user/:userId', async (req, res) => {
+    const { userId } = req.params;
+    User.findOneAndRemove({ userId }, (err, result) => {
+        if (err) return error("Can not remove user")
+        return success("User removed Successfully", res, { userId })
+    })
+})
 
 
 function verifyUser(req, res, next) {
@@ -96,6 +138,6 @@ function verifyUser(req, res, next) {
 }
 
 
-app.listen(process.env.PORT, () => {
-    console.info("server started at port: " + process.env.PORT)
+app.listen(process.env.PORT || 5000, () => {
+    console.info("server started at port: " + process.env.PORT || 5000)
 })
