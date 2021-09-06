@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const url = process.env.LOCAL_URL;
+const url = process.env.REMOTE_URL;
 mongoose.connect(url, (err) => {
     if (err) console.error("couldn't build DB connection");
     else console.info("DB connected successfully")

@@ -78,7 +78,7 @@ router.get("/get/user/by/token", (req, res) => {
 })
 
 function getDataByToken(token) {
-    return jwt.vFerify(token, process.env.JWT_SECRET);
+    return jwt.verify(token, process.env.JWT_SECRET);
 }
 
 module.exports = router;
