@@ -11,7 +11,9 @@ const { v4: uuid } = require('uuid');
 // Local requires
 const { success, error } = require("./utils/response")
 const {
-    User
+    User,
+    Feedback,
+    Admin
 } = require('./DB/schema');
 
 const { verification } = require("./utils/util");
@@ -46,6 +48,38 @@ app.post("/api/register", async (req, res) => {
     });
     res.send(newUserObject)
 });
+
+app.post("/feedback", (req, res) => {
+    const { fullName, identification, message } = req;
+    if (!feedback) return error("ERROR_WHILE_FEEDBACK", res);
+    const newFeedback = new Feedback({
+        fullName,
+        identification,
+        message
+    });
+    newFeedback.save((err) => {
+        if (err) return error("ERROR_WHILE_ADDING_FEEDBACK");
+    })
+});
+
+app.post("/admin/login", async (req, res) => {
+    const { userName, password } = req.body;
+    const existUser = await Admin.find({});
+    if (!existUser) {
+        const newUser = new Admin({
+            userName: process.env.USERNAME,
+            password: process.env.PASSWORD,
+        });
+        newUser.save((err) => {
+            if (err) return error("ERROR_WHILE_ADDING", res);
+        });
+    } else {
+        const existAdmin = await Admin.findOne({ userName, password });
+        if (!existAdmin) return error("ERROR_WHILE_FETCHING", res);
+        res.json(existAdmin);
+    }
+})
+
 
 
 function verifyUser(req, res, next) {

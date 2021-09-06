@@ -47,10 +47,25 @@ const activitySchema = new mongoose.Schema({
     date: String
 });
 
+const feedbackSchema = new mongoose.Schema({
+    fullName: String,
+    identification: String,
+    message: String
+});
+
+const adminSchema = new mongoose.Schema({
+    userName: String,
+    password: String
+})
+
 const User = mongoose.model('user', userSchema);
 const Activity = mongoose.model('activity', activitySchema);
+const Feedback = mongoose.model('feedback', feedbackSchema);
+const Admin = mongoose.model('admin', adminSchema);
 
 module.exports = {
     User,
-    Activity
+    Activity,
+    Feedback,
+    Admin
 }
