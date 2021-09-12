@@ -1,6 +1,6 @@
 module.exports = {
-    verification({ email, phone, fullName, gender, dob }) {
-        if (!email || !phone || !fullName || !gender || !dob) return false;
+    verification({ email, phone, fullName, gender, age, userName, password }) {
+        if (!email || !phone || !fullName || !gender || !age || !userName || !password) return false;
         return true;
     },
     dateExtract() {

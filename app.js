@@ -29,15 +29,17 @@ app.post("/api/login", async (req, res) => {
     const { userName, password } = req.body;
     const existUser = await User.find({ userName });
     let flag = false;
+    let foundUser;
     for (let user of existUser) {
         const match = bcrypt.compareSync(password, user.password);
         if (match) {
             flag = true;
+            foundUser = user;
             break;
         }
     }
     if (!flag) return error("NO_USER_FOUND", res);
-    jwt.sign({ userId: existUser.userId }, process.env.JWT_SECRET, (err, token) => {
+    jwt.sign({ userId: foundUser.userId }, process.env.JWT_SECRET, (err, token) => {
         if (err) return error("VERIFICATION_FAILED", res);
         return success("Logged in successfully", res, { token })
     })

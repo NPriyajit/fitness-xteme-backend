@@ -14,33 +14,21 @@ const userSchema = new mongoose.Schema({
     phone: String,
     fullName: String,
     gender: String,
-    dob: String,
-    preference: {
-        age: Number,
-        height: Number,
-        weight: Number,
-        BMI: Number,
-        activeStatus: String
-    }
+    age: Number,
+    height: Number,
+    weight: Number,
+    BMI: Number,
+    activeStatus: String
 });
 
 const activitySchema = new mongoose.Schema({
     userId: String,
-    workout: {
-        time: Number,
-        unit: String,
-    },
+    workout: Number,
     diet: {
-        foodList: [],
+        foodItems: []
     },
-    water: {
-        glasses: Number,
-        unit: String,
-    },
-    sleep: {
-        time: Number,
-        unit: String,
-    },
+    water: Number,
+    sleep: Number,
     day: Number,
     month: Number,
     year: Number,
