@@ -54,7 +54,6 @@ router.get("/fetch/growth/by/:day/:month/:year", async (req, res) => {
     const { userId } = getDataByToken(token)
     if (typeof userId === 'undefined') return error("NO_TOKEN_DATA_FOUNT");
     const existActivity = await Activity.findOne({ userId, day: parseInt(day), month: parseInt(month), year: parseInt(year) });
-    if (!existActivity) return error("NO_DATA_FOUND", res);
     return res.json(existActivity)
 })
 
@@ -64,16 +63,16 @@ router.get("/fetch/daily/growth", async (req, res) => {
     const { day, month, year } = dateExtract();
     if (typeof userId === 'undefined') return error("NO_TOKEN_DATA_FOUNT");
     const existActivity = await Activity.findOne({ userId, day, month, year });
-    if (!existActivity) return error("NO_DATA_FOUND", res);
     return res.json(existActivity)
 });
 
 
-router.get("/get/user/by/token", (req, res) => {
+router.get("/get/user/by/token", async (req, res) => {
     const { token } = req;
     const data = getDataByToken(token)
     if (data === null) return res.status(403).send("AUTH_TOKEN_NOT_AVAILABLE");
-    return success("Token data fetched successfully!", res, data);
+    const user = await User.findOne({ userId: data.userId });
+    return success("Token data fetched successfully!", res, user);
 
 })
 

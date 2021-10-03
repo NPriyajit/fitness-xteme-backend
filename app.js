@@ -57,11 +57,18 @@ app.post("/api/register", async (req, res) => {
     const { body: userObject } = req;
     if (!userObject) return error("NO_DATA_FOUND", res);
     if (!verification(userObject)) return error("WRONG_FILED_ERROR", res);
+    const existUser = await User.findOne({ userName: userObject.userName });
+    if (existUser) return success("User Already Exists", res, null);
     const userId = uuid();
     userObject.userId = userId;
+
+    const weightInLB = parseFloat(userObject.weight) * 2.20462262185;
+    const heightInInch = parseFloat(userObject.height) * 0.3937007874;
+    const BMI = Math.ceil((weightInLB / heightInInch / heightInInch) * 703);
+
+    userObject.BMI = BMI;
     const salt = bcrypt.genSaltSync(parseInt(process.env.SALT_ROUNDS));
     const password = bcrypt.hashSync(userObject.password, salt);
-
     userObject.password = password;
     const newUserObject = new User(userObject);
     newUserObject.save((err) => {
