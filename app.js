@@ -78,8 +78,8 @@ app.post("/api/register", async (req, res) => {
 });
 
 app.post("/feedback", (req, res) => {
-    const { fullName, identification, message } = req;
-    if (!feedback) return error("ERROR_WHILE_FEEDBACK", res);
+    const { fullName, identification, message } = req.body;
+    if (!fullName || !identification || !message) return error("ERROR_WHILE_FEEDBACK", res);
     const newFeedback = new Feedback({
         fullName,
         identification,
