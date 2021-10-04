@@ -87,6 +87,7 @@ app.post("/feedback", (req, res) => {
     });
     newFeedback.save((err) => {
         if (err) return error("ERROR_WHILE_ADDING_FEEDBACK");
+        else return success("Feedback added successfully!")
     })
 });
 
