@@ -91,6 +91,10 @@ app.post("/feedback", (req, res) => {
     })
 });
 
+app.get('/feedback',async (req,res)=>{
+    res.json(await Feedback.find({}))
+})
+
 app.post("/api/admin/login", async (req, res) => {
     const { userName, password } = req.body;
     const existUser = await Admin.find({});
