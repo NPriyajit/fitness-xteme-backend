@@ -102,6 +102,7 @@ app.get('/api/feedback', async (req, res) => {
 })
 
 app.post("/api/admin/login", async (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
     const { userName, password } = req.body;
     const existUser = await Admin.find({});
 
@@ -131,11 +132,13 @@ app.post("/api/admin/login", async (req, res) => {
 })
 
 app.get('/api/all/users', async (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
     res.json(await User.find({}));
 })
 
 
 app.delete('/api/remove/user/:userId', async (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
     const { userId } = req.params;
     User.findOneAndRemove({ userId }, (err, result) => {
         if (err) return error("Can not remove user",res)
