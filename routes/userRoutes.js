@@ -27,7 +27,7 @@ router.post("/new/activity", async (req, res) => {
     const { body: activityObj } = req;
     const { token } = req;
     const { userId } = getDataByToken(token)
-    if (typeof userId === 'undefined') return error("NO_TOKEN_DATA_FOUNT");
+    if (typeof userId === 'undefined') return error("NO_TOKEN_DATA_FOUNT",res);
     const { day, month, year, date } = dateExtract();
     const existUser = await User.findOne({ userId });
     const existActivity = await Activity.findOne({ userId, date });
@@ -56,7 +56,7 @@ router.get("/fetch/growth/by/:day/:month/:year", async (req, res) => {
     const { day, month, year } = req.params;
     const { token } = req;
     const { userId } = getDataByToken(token)
-    if (typeof userId === 'undefined') return error("NO_TOKEN_DATA_FOUNT");
+    if (typeof userId === 'undefined') return error("NO_TOKEN_DATA_FOUNT",res);
     const existActivity = await Activity.findOne({ userId, day: parseInt(day), month: parseInt(month), year: parseInt(year) });
     return res.json(existActivity)
 })
@@ -65,7 +65,7 @@ router.get("/fetch/daily/growth", async (req, res) => {
     const { token } = req;
     const { userId } = getDataByToken(token)
     const { day, month, year } = dateExtract();
-    if (typeof userId === 'undefined') return error("NO_TOKEN_DATA_FOUNT");
+    if (typeof userId === 'undefined') return error("NO_TOKEN_DATA_FOUNT", res);
     const existActivity = await Activity.findOne({ userId, day, month, year });
     return res.json(existActivity)
 });

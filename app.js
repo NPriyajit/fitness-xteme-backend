@@ -26,6 +26,7 @@ app.use(bodyParser.json());
 app.use('/api/user', verifyUser, userRoute)
 
 app.post("/api/login", async (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
     const { userName, password } = req.body;
     const existUser = await User.find({ userName });
     let flag = false;
@@ -46,6 +47,7 @@ app.post("/api/login", async (req, res) => {
 })
 
 app.get("/api/check/user/:userName", async (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
     const { userName } = req.params;
     const existUser = await User.findOne({ userName })
     if (existUser) return error("USER_ALREADY_EXISTS", res);
@@ -54,6 +56,7 @@ app.get("/api/check/user/:userName", async (req, res) => {
 
 
 app.post("/api/register", async (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
     const { body: userObject } = req;
     if (!userObject) return error("NO_DATA_FOUND", res);
     if (!verification(userObject)) return error("WRONG_FILED_ERROR", res);
@@ -77,21 +80,24 @@ app.post("/api/register", async (req, res) => {
     return success("User Added Successfully!", res, { userId, userName: newUserObject.userName })
 });
 
-app.post("/feedback", (req, res) => {
+app.post("/api/feedback", (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
     const { fullName, identification, message } = req.body;
     if (!fullName || !identification || !message) return error("ERROR_WHILE_FEEDBACK", res);
     const newFeedback = new Feedback({
         fullName,
         identification,
-        message
+        message,
+        createdAt: Date.now()
     });
     newFeedback.save((err) => {
-        if (err) return error("ERROR_WHILE_ADDING_FEEDBACK");
-        else return success("Feedback added successfully!")
+        if (err) return error("ERROR_WHILE_ADDING_FEEDBACK",res);
+        else return success("Feedback added successfully!",res)
     })
 });
 
-app.get('/feedback',async (req,res)=>{
+app.get('/api/feedback', async (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
     res.json(await Feedback.find({}))
 })
 
@@ -132,7 +138,7 @@ app.get('/api/all/users', async (req, res) => {
 app.delete('/api/remove/user/:userId', async (req, res) => {
     const { userId } = req.params;
     User.findOneAndRemove({ userId }, (err, result) => {
-        if (err) return error("Can not remove user")
+        if (err) return error("Can not remove user",res)
         return success("User removed Successfully", res, { userId })
     })
 })
