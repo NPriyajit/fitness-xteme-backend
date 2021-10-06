@@ -13,6 +13,10 @@ router.put("/update/preferences/:userId", async (req, res) => {
     const { body: userObj } = req;
     const existUser = await User.findOne({ userId });
     if (!existUser) return error("NO_DATA_FOUND", res);
+    const weightInLB = parseFloat(userObj.weight) * 2.20462262185;
+    const heightInInch = parseFloat(userObj.height) * 0.3937007874;
+    const BMI = Math.ceil((weightInLB / heightInInch / heightInInch) * 703);
+    userObj.BMI = BMI;
     User.findOneAndUpdate({ userId }, userObj, (err, result) => {
         if (err) return error("ERROR_WHILE_UPDATE", res)
         return success("Updated Successfully", res);

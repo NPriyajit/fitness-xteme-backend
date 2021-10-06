@@ -37,6 +37,7 @@ const activitySchema = new mongoose.Schema({
 
 const feedbackSchema = new mongoose.Schema({
     fullName: String,
+    date: Date.now(),
     identification: String,
     message: String
 });
